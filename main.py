@@ -57,6 +57,20 @@ class Application:
 
         return f"ft: {self.cur_frametime * 1000:.2f} ms"
 
+    def step_simulation(self):
+        """
+        Step GoL simulation
+        """
+
+        rolls = [
+            (1,  1), (0,  1), (-1,  1),
+            (1,  0), (0,  0), (-1,  0),
+            (1, -1), (0, -1), (-1, -1)]
+        rolled_arrays = map(
+            lambda x: np.roll(np.copy(self.board), x, axis=(1, 0)),
+            rolls)
+        neighbors = sum(rolled_arrays)
+
     def run(self):
         """
         Runs the application
