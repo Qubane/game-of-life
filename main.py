@@ -9,7 +9,7 @@ class Application:
     """
 
     def __init__(self, debug_info: bool = False):
-        self.framerate: int = 30
+        self.framerate: int = 4
         self.frametime: float = 1 / self.framerate
         self.cur_time: float = 0
         self.cur_frametime: float = 0
@@ -20,6 +20,7 @@ class Application:
         self.height: int = os.get_terminal_size().lines - int(debug_info)
 
         self.board: np.ndarray | None = None
+        self.gol_rules: np.vectorize = np.vectorize(lambda x: int(x == 3 or x == 4))
 
         self.initialize()
 
@@ -28,7 +29,7 @@ class Application:
         Initialize the application
         """
 
-        self.board = np.zeros([self.width, self.height], dtype=np.bool_)  # init board with 0's
+        self.board = np.zeros([self.width, self.height], dtype=np.uint8)  # init board with 0's
 
         os.system("cls" if os.name == "nt" else "clear")  # init ANSI escape codes and clear terminal
         print("\033[?25l", end="", flush=True)  # make cursor invisible
@@ -69,16 +70,22 @@ class Application:
         rolled_arrays = map(
             lambda x: np.roll(np.copy(self.board), x, axis=(1, 0)),
             rolls)
-        neighbors = sum(rolled_arrays)
+        self.board = self.gol_rules(sum(rolled_arrays))
 
     def run(self):
         """
         Runs the application
         """
 
+        # basic oscillator
+        self.board[2][2] = 1
+        self.board[2][3] = 1
+        self.board[2][4] = 1
+
         while True:
             self.cur_time = time.perf_counter()
             self.draw_board()
+            self.step_simulation()
             self.cur_frametime = time.perf_counter() - self.cur_time
             time.sleep(max(.0, self.frametime - self.cur_frametime))
 
