@@ -11,6 +11,8 @@ class Application:
     def __init__(self, debug_info: bool = False):
         self.framerate: int = 30
         self.frametime: float = 1 / self.framerate
+        self.cur_time: float = 0
+        self.cur_frametime: float = 0
 
         self.debug_info: bool = debug_info
 
@@ -53,7 +55,7 @@ class Application:
         Returns debug information about the renderer
         """
 
-        return ""
+        return f"ft: {self.cur_frametime * 1000:.2f} ms"
 
     def run(self):
         """
@@ -61,12 +63,14 @@ class Application:
         """
 
         while True:
+            self.cur_time = time.perf_counter()
             self.draw_board()
-            time.sleep(self.frametime)
+            self.cur_frametime = time.perf_counter() - self.cur_time
+            time.sleep(max(.0, self.frametime - self.cur_frametime))
 
 
 def main():
-    app = Application()
+    app = Application(debug_info=True)
     app.run()
 
 
