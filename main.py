@@ -29,12 +29,28 @@ class Application:
         os.system("cls" if os.name == "nt" else "clear")  # init ANSI escape codes and clear terminal
         print("\033[?25l", end="", flush=True)  # make cursor invisible
 
+    def draw_board(self):
+        """
+        Prints the board to the terminal
+        """
+
+        output = "\033[H"  # set cursor pos to 0,0
+        old_val = -1
+        for y in range(self.height):
+            for x in range(self.width):
+                if (cur_val := self.board[x][y]) != old_val:
+                    old_val = cur_val
+                    output += "\033[47m" if cur_val else "\033[40m"
+                output += "  "
+        print(output, end="", flush=True)
+
     def run(self):
         """
         Runs the application
         """
 
         while True:
+            self.draw_board()
             time.sleep(self.frametime)
 
 
