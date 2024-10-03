@@ -8,12 +8,14 @@ class Application:
     Main application class
     """
 
-    def __init__(self):
+    def __init__(self, debug_info: bool = False):
         self.framerate: int = 30
         self.frametime: float = 1 / self.framerate
 
+        self.debug_info: bool = debug_info
+
         self.width: int = os.get_terminal_size().columns // 2
-        self.height: int = os.get_terminal_size().lines
+        self.height: int = os.get_terminal_size().lines - int(debug_info)
 
         self.board: np.ndarray | None = None
 
@@ -42,7 +44,16 @@ class Application:
                     old_val = cur_val
                     output += "\033[47m" if cur_val else "\033[40m"
                 output += "  "
+        if self.debug_info:
+            output += self.get_debug_info()
         print(output, end="", flush=True)
+
+    def get_debug_info(self) -> str:
+        """
+        Returns debug information about the renderer
+        """
+
+        return ""
 
     def run(self):
         """
