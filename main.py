@@ -56,7 +56,7 @@ class Application:
         Returns debug information about the renderer
         """
 
-        return f"ft: {self.cur_frametime * 1000:.2f} ms"
+        return f"\033[0mft: {self.cur_frametime * 1000:.2f} ms"
 
     def step_simulation(self):
         """
@@ -72,16 +72,20 @@ class Application:
             rolls)
         self.board = self.gol_rules(sum(rolled_arrays))
 
+    def plot_random(self):
+        """
+        Just adds random cells on the board
+        """
+
+        for i in range(100):
+            self.board[np.random.randint(0, self.width)][np.random.randint(0, self.height)] = 1
+
     def run(self):
         """
         Runs the application
         """
 
-        # basic oscillator
-        self.board[2][2] = 1
-        self.board[2][3] = 1
-        self.board[2][4] = 1
-
+        self.plot_random()
         while True:
             self.cur_time = time.perf_counter()
             self.draw_board()
