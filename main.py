@@ -1,6 +1,7 @@
 import os
 import time
 import numpy as np
+from argparse import ArgumentParser
 
 
 class Application:
@@ -8,8 +9,11 @@ class Application:
     Main application class
     """
 
-    def __init__(self, debug_info: bool = False):
-        self.framerate: int = 30
+    def __init__(
+            self,
+            framerate: float = 30,
+            debug_info: bool = False):
+        self.framerate: float = framerate
         self.frametime: float = 1 / self.framerate
         self.cur_time: float = 0
         self.cur_frametime: float = 0
@@ -42,6 +46,8 @@ class Application:
         output = "\033[H"  # set cursor pos to 0,0
         old_val = -1
         for y in range(self.height):
+            if y > 0:
+                output += "\n"
             for x in range(self.width):
                 if (cur_val := self.board[x][y]) != old_val:
                     old_val = cur_val
@@ -98,8 +104,34 @@ class Application:
             time.sleep(max(.0, self.frametime - self.cur_frametime))
 
 
+def parse_args():
+    """
+    Parses command line arguments
+    """
+
+    parser = ArgumentParser(
+        prog="game of life",
+        description="just a game of life")
+
+    parser.add_argument(
+        "-f", "--framerate",
+        help="set simulation framerate (smaller = slower)",
+        type=float,
+        default=15.)
+    parser.add_argument(
+        "-d", "--debug",
+        help="display debug information",
+        action="store_true",
+        default=False)
+
+    return parser.parse_args()
+
+
 def main():
-    app = Application(debug_info=True)
+    args = parse_args()
+    app = Application(
+        framerate=args.framerate,
+        debug_info=args.debug)
     app.run()
 
 
