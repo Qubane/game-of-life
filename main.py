@@ -9,7 +9,7 @@ class Application:
     """
 
     def __init__(self, debug_info: bool = False):
-        self.framerate: int = 4
+        self.framerate: int = 30
         self.frametime: float = 1 / self.framerate
         self.cur_time: float = 0
         self.cur_frametime: float = 0
@@ -20,7 +20,7 @@ class Application:
         self.height: int = os.get_terminal_size().lines - int(debug_info)
 
         self.board: np.ndarray | None = None
-        self.gol_rules: np.vectorize = np.vectorize(lambda x: int(x == 3 or x == 4))
+        self.gol_rules: np.vectorize = np.vectorize(lambda cur, old: int(cur == 3 or (cur == 4 and old == 1)))
 
         self.initialize()
 
@@ -70,22 +70,26 @@ class Application:
         rolled_arrays = map(
             lambda x: np.roll(np.copy(self.board), x, axis=(1, 0)),
             rolls)
-        self.board = self.gol_rules(sum(rolled_arrays))
+        self.board = self.gol_rules(sum(rolled_arrays), self.board)
 
-    def plot_random(self):
+    def plot_random(self, infill: float):
         """
         Just adds random cells on the board
         """
 
-        for i in range(100):
-            self.board[np.random.randint(0, self.width)][np.random.randint(0, self.height)] = 1
+        x, y = 0, 0
+        for i in range(int(self.width * self.height * infill)):
+            # don't plot already placed points
+            while self.board[x][y] == 1:
+                x, y = np.random.randint(0, self.width), np.random.randint(0, self.height)
+            self.board[x][y] = 1
 
     def run(self):
         """
         Runs the application
         """
 
-        self.plot_random()
+        self.plot_random(infill=0.1)
         while True:
             self.cur_time = time.perf_counter()
             self.draw_board()
