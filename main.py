@@ -14,9 +14,9 @@ class Application:
             framerate: float = 30,
             debug_info: bool = False):
         self.framerate: float = framerate
-        self.frametime: float = 1 / self.framerate
-        self.cur_time: float = 0
-        self.cur_frametime: float = 0
+        self.frame_time: float = 1 / self.framerate
+        self.frame_start: float = 0
+        self.frame_delta: float = 0
 
         self.debug_info: bool = debug_info
 
@@ -54,15 +54,20 @@ class Application:
                     output += "\033[47m" if cur_val else "\033[40m"
                 output += "  "
         if self.debug_info:
-            output += self.get_debug_info()
+            output += self.get_debug()
         print(output, end="", flush=True)
 
-    def get_debug_info(self) -> str:
+    def get_debug(self):
         """
-        Returns debug information about the renderer
+        Draws just the debug information
         """
 
-        return f"\033[0mft: {self.cur_frametime * 1000:.2f} ms"
+        # \033[{self.height+1};0H - set cursor to bottom of terminal
+        # \033[0m - reset all color modifiers
+        # \033[0K - clear from cursor to end of line
+
+        return (f"\033[{self.height+1};0H\033[0m\033[0K"
+                f"sft: {self.frame_delta * 1000:.2f} ms")
 
     def step_simulation(self):
         """
@@ -97,11 +102,11 @@ class Application:
 
         self.plot_random(infill=0.1)
         while True:
-            self.cur_time = time.perf_counter()
+            self.frame_start = time.perf_counter()
             self.draw_board()
             self.step_simulation()
-            self.cur_frametime = time.perf_counter() - self.cur_time
-            time.sleep(max(.0, self.frametime - self.cur_frametime))
+            self.frame_delta = time.perf_counter() - self.frame_start
+            time.sleep(max(.0, self.frame_time - self.frame_delta))
 
 
 def parse_args():
